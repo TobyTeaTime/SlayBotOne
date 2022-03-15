@@ -1,19 +1,17 @@
 package frc.robot.common;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 /*------------------------Imports------------------------------------*/
-
+import com.ctre.phoenix.motorcontrol.SensorCollection;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class RobotMap {
@@ -30,17 +28,17 @@ public class RobotMap {
 	public static WPI_VictorSPX storageRight = new WPI_VictorSPX(6);
 	public static WPI_TalonFX flywheel = new WPI_TalonFX(7);
 
+	public static WPI_TalonSRX innerClimbLeft = new WPI_TalonSRX(8);
+	public static WPI_TalonSRX innerClimbRight = new WPI_TalonSRX(9);
+	public static WPI_TalonSRX outerClimbLeft = new WPI_TalonSRX(10);
+	public static WPI_TalonSRX outerClimbRight = new WPI_TalonSRX(11);
+
 	public static DoubleSolenoid solenoid1 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 7, 5);
 	public static DoubleSolenoid solenoid2 = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 4);
 	public static Compressor compressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
 	public static Joystick m_joy = new Joystick(0);
 	public static XboxController m_xbox = new XboxController(1);
-
-	public static Encoder encoder1 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder2 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder3 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder4 = new Encoder(0, 1, false, EncodingType.k4X);
 
 	public static MotorControllerGroup leftGroup = new MotorControllerGroup(leftAft, leftFront);
 	public static MotorControllerGroup rightGroup = new MotorControllerGroup(rightAft, rightFront);
@@ -50,6 +48,17 @@ public class RobotMap {
 
 	public static Ultrasonic ultrasonic = new Ultrasonic(0, 1);
 
+	public static SensorCollection encoder1 = innerClimbLeft.getSensorCollection();
+	public static SensorCollection encoder2 = innerClimbRight.getSensorCollection();
+	public static SensorCollection encoder3 = outerClimbLeft.getSensorCollection();
+	public static SensorCollection encoder4 = outerClimbRight.getSensorCollection();
+
+	// 1/1024 = 1 rotation is equal to 1024 ticks
+	// 1/1 = gear ratio, since it's 1, you don't need to put it here
+	// .5pi/1 rotation = circumference of thing turning per rotation
+	// (optional) 1/12 = 1 foot in 12 inches to convert to feet
+	public static double kInnerClimbTick2Inches = 1 / 1024 * .5 * Math.PI;
+	public static double kOuterClimbTick2Deg = 1 / 1024 * 9 / 1;
 }
 // x - 2.62
 // y - 3.85

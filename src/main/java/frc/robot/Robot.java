@@ -14,30 +14,21 @@ package frc.robot;
 
 //import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 //import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static frc.robot.common.RobotMap.*;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 @SuppressWarnings("FieldCanBeLocal")
 public class Robot extends TimedRobot {
 
-  private SendableChooser<Double> fineControlSpeed = new SendableChooser<>();
-  private SendableChooser<Double> deadBandOptions = new SendableChooser<>();
-  private SendableChooser<Double> Encoder1 = new SendableChooser<>();
-  private SendableChooser<Double> Encoder2 = new SendableChooser<>();
-  private SendableChooser<Double> Encoder3 = new SendableChooser<>();
-  private SendableChooser<Double> Encoder4 = new SendableChooser<>();
-  double timer;
   double distance = ultrasonic.getRangeInches();
   double fineControlSpeedDouble = .45;
-  // double val = 0.7;
-  // private SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
-  // private final RamseteController m_ramsete = new RamseteController();
-  // private final Timer m_timer = new Timer();
+  private final Timer m_timer = new Timer();
 
   @Override
   public void robotInit() {
@@ -59,35 +50,47 @@ public class Robot extends TimedRobot {
     storageLeft.configFactoryDefault();
     storageRight.configFactoryDefault();
     flywheel.configFactoryDefault();
+
     leftAft.configFactoryDefault();
     leftFront.configFactoryDefault();
     rightAft.configFactoryDefault();
     rightFront.configFactoryDefault();
+
+    innerClimbLeft.configFactoryDefault();
+    innerClimbRight.configFactoryDefault();
+    outerClimbLeft.configFactoryDefault();
+    outerClimbRight.configFactoryDefault();
+
     intakeWheel.setInverted(true);
     rightAft.setInverted(true);
     rightFront.setInverted(true);
     storageLeft.setInverted(true);
     storageRight.setInverted(true);
 
-    // Fine Control Speed chooser
-    fineControlSpeed.addOption("35% Speed", 0.35);
-    fineControlSpeed.addOption("40% Speed", 0.40);
-    fineControlSpeed.setDefaultOption("45% Speed", 0.45);
-    fineControlSpeed.addOption("50% Speed", 0.50);
-    fineControlSpeed.addOption("55% Speed", 0.55);
-    fineControlSpeed.addOption("60% Speed", 0.60);
-    Shuffleboard.getTab("Vision").add("Fine Control Speed", fineControlSpeed);
-
-    // Deadband chooser
-    deadBandOptions.setDefaultOption("5%", 0.05);
-    deadBandOptions.addOption("10%", 0.10);
-    deadBandOptions.addOption("15%", 0.15);
-    Shuffleboard.getTab("Vision").add("Dead Band", deadBandOptions);
+    innerClimbRight.follow(innerClimbLeft);
+    outerClimbRight.follow(outerClimbRight);
 
     compressor.enableDigital();
 
-    // double dist = sonic.getRangeInches();
+    m_drive.setDeadband(.05);
 
+  }
+
+  @Override
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("InnerClimbLeft Encoder Value",
+        innerClimbLeft.getSelectedSensorPosition() * kInnerClimbTick2Inches);
+    SmartDashboard.putNumber("InnerClimbRight Encoder Value",
+        innerClimbRight.getSelectedSensorPosition() * kInnerClimbTick2Inches);
+    SmartDashboard.putNumber("OuterClimbLeft Encoder Value",
+        outerClimbLeft.getSelectedSensorPosition() * kOuterClimbTick2Deg);
+    SmartDashboard.putNumber("OuterClimbRight Encoder Value",
+        outerClimbRight.getSelectedSensorPosition() * kOuterClimbTick2Deg);
+
+    if (compressor.getPressureSwitchValue() == false) {
+      compressor.disable();
+
+    }
   }
 
   @Override
@@ -100,26 +103,27 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    timer++;
 
-    if (m_xbox.getAButton() == true) {
+    m_timer.start();
+
+    if (m_xbox.getAButton()) {
       solenoid1.set(Value.kReverse);
       solenoid2.set(Value.kReverse);
-    } else if (m_xbox.getAButton() == false) {
+    } else {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
     }
 
-    if (m_xbox.getXButton() == true) {
+    if (m_xbox.getXButton()) {
       intakeWheel.set(.6);
-      timer = 0;
-      if (distance <= 4) {
+      while (distance <= 4 || m_timer.hasElapsed(2)) {
         storageGroup.set(.65);
       }
     } else {
       intakeWheel.set(0);
       storageGroup.set(0);
     }
+    
     /*
      * flywheel speed adjust
      * if (m_xbox.getBButtonPressed()){
@@ -137,6 +141,16 @@ public class Robot extends TimedRobot {
       flywheel.set(0);
     }
 
+    if (m_xbox.getPOV() == 0) {
+      innerClimbLeft.set(ControlMode.Position, 6 / kInnerClimbTick2Inches);
+    } else if (m_xbox.getPOV() == 180) {
+      innerClimbLeft.set(ControlMode.Position, -6 / kInnerClimbTick2Inches);
+    } else if (m_xbox.getPOV() == 90) {
+      outerClimbLeft.set(ControlMode.Position, 45 / kOuterClimbTick2Deg);
+    } else if (m_xbox.getPOV() == 270) {
+      outerClimbLeft.set(ControlMode.Position, -45 / kOuterClimbTick2Deg);
+    }
+
     if (m_joy.getPOV() == 0) { // Forward
       m_drive.arcadeDrive(fineControlSpeedDouble, 0);
     } else if (m_joy.getPOV() == 90) { // Right
@@ -149,15 +163,6 @@ public class Robot extends TimedRobot {
     }
 
     m_drive.arcadeDrive(m_joy.getY(), -m_joy.getX());
-  }
-
-  @Override
-  public void robotPeriodic() {
-
-    if (compressor.getPressureSwitchValue() == false) {
-      compressor.disable();
-
-    }
   }
 
   @Override
