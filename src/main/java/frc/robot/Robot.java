@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
 
 
 
-       compressor.enableDigital();
+       
         
         
 
@@ -94,10 +94,11 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
       
-
+/*
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
-      
+*/
+      compressor.enableDigital();
 
     }
     @Override
@@ -144,12 +145,13 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void robotPeriodic() {
-
+/*
     if (compressor.getPressureSwitchValue() == false) {
       compressor.disable();
+      */
 
     }
-  }
+  
   @Override
   public void autonomousInit() {
 
