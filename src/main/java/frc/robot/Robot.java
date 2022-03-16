@@ -77,11 +77,7 @@ public class Robot extends TimedRobot {
         deadBandOptions.addOption("15%", 0.15);
         Shuffleboard.getTab("Vision").add("Dead Band", deadBandOptions);
 
-
-
-
-
-       
+        
         
         
 
@@ -98,7 +94,7 @@ public class Robot extends TimedRobot {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
 */
-      compressor.enableDigital();
+     
 
     }
     @Override
@@ -145,12 +141,16 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void robotPeriodic() {
-/*
-    if (compressor.getPressureSwitchValue() == false) {
-      compressor.disable();
-      */
 
+    compressor.enableDigital();
+
+
+    if (compressor.getPressureSwitchValue() == true) {
+      compressor.disable();
     }
+      
+    }
+    
   
   @Override
   public void autonomousInit() {
