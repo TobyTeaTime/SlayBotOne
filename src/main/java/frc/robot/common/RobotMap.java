@@ -39,16 +39,7 @@ public class RobotMap {
 	
 	public static Joystick m_joy = new Joystick(0);
 	public static XboxController m_xbox = new XboxController(1);
-
-
-
-	public static Encoder encoder1 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder2 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder3 = new Encoder(0, 1, false, EncodingType.k4X);
-	public static Encoder encoder4 = new Encoder(0, 1, false, EncodingType.k4X);
-
-
-
+	
 	public static MotorControllerGroup leftGroup = new MotorControllerGroup(leftAft, leftFront);
 	public static MotorControllerGroup rightGroup = new MotorControllerGroup(rightAft, rightFront);
 	public static MotorControllerGroup storageGroup = new MotorControllerGroup(storageLeft, storageRight);
