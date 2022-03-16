@@ -90,8 +90,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     // Puts numbers from Encoders on the SmartDashboard network table
-    // Open Shuffleboard to see numbers, can be visualized as graphs or ot other
-    // graphic
+    // Open Shuffleboard to see numbers, can be visualized as graphs or other graphic
     SmartDashboard.putNumber("InnerClimbLeft Encoder Value",
         innerClimbLeft.getSelectedSensorPosition() * kInnerClimbTick2Inches);
     SmartDashboard.putNumber("InnerClimbRight Encoder Value",
@@ -124,8 +123,7 @@ public class Robot extends TimedRobot {
 
   // teleopPeriodic = code that is run as long as teleop is enabled (runs every
   // 20ms)
-  // Going to be the majority of where your code is, troubleshoot and debug
-  // thouroughly
+  // Going to be the majority of where your code is, troubleshoot and debug thoroug// 
   @Override
   public void teleopPeriodic() {
 
@@ -143,7 +141,7 @@ public class Robot extends TimedRobot {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
     }
-
+    
     // Asks if the X Button is currently being pressed
     // If it is, set the intake motor controller to 60% power
     // If the ultrasonic detects less that 4 inches AND the timer has elapsed 2
