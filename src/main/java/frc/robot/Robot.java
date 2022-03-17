@@ -27,7 +27,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 @SuppressWarnings("FieldCanBeLocal")
 public class Robot extends TimedRobot {
 
-  double distance = ultrasonic.getRangeInches();
   double fineControlSpeedDouble = .45;
   private final Timer m_timer = new Timer();
 
@@ -38,7 +37,6 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
   }
-  
 
   // robotInit = code the roboRIO runs on startup, only runs once
   // Good for things like resets, calibration, turning things on etc
@@ -84,24 +82,28 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     // Puts numbers from Encoders on the SmartDashboard network table
-    // Open Shuffleboard to see numbers, can be visualized as graphs or other graphic
+    // Open Shuffleboard to see numbers, can be visualized as graphs or other
+    // graphic
+
     SmartDashboard.putNumber("InnerClimbLeft Encoder Value",
         innerClimbLeft.getSelectedSensorPosition() * kInnerClimbTick2Inches);
-    SmartDashboard.putNumber("InnerClimbRight Encoder Value",
-        innerClimbRight.getSelectedSensorPosition() * kInnerClimbTick2Inches);
-    SmartDashboard.putNumber("OuterClimbLeft Encoder Value",
-        outerClimbLeft.getSelectedSensorPosition() * kOuterClimbTick2Deg);
-    SmartDashboard.putNumber("OuterClimbRight Encoder Value",
-        outerClimbRight.getSelectedSensorPosition() * kOuterClimbTick2Deg);
+    /*
+     * SmartDashboard.putNumber("InnerClimbRight Encoder Value",
+     * innerClimbRight.getSelectedSensorPosition() * kInnerClimbTick2Inches);
+     * SmartDashboard.putNumber("OuterClimbLeft Encoder Value",
+     * outerClimbLeft.getSelectedSensorPosition() * kOuterClimbTick2Deg);
+     * SmartDashboard.putNumber("OuterClimbRight Encoder Value",
+     * outerClimbRight.getSelectedSensorPosition() * kOuterClimbTick2Deg);
+     */
     SmartDashboard.putNumber("Ultrasonic",
-     distance);
+        distance);
 
+    compressor.enableDigital();
 
-    
     // Uses the Pressure Switxh to turn off the compressor
     // PSI depends on Pressure Switch, 2022 bot uses a Pressure Switch that switches
     // at 125PSI
-    if (compressor.getPressureSwitchValue() == false) {
+    if (compressor.getPressureSwitchValue() == true) {
       compressor.disable();
     }
 
@@ -113,17 +115,18 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
 
     // Enables the Compressor, Make sure to turn the compressor off later
-    compressor.enableDigital();
+
     // Sets solenoids to Forward Position
     // Check with Pneumatic System to verify which position is forward
-    solenoid1.set(Value.kForward);
-    solenoid2.set(Value.kForward);
+    solenoid1.set(Value.kReverse);
+    solenoid2.set(Value.kReverse);
 
   }
 
   // teleopPeriodic = code that is run as long as teleop is enabled (runs every
   // 20ms)
-  // Going to be the majority of where your code is, troubleshoot and debug thoroug// 
+  // Going to be the majority of where your code is, troubleshoot and debug
+  // thoroug//
   @Override
   public void teleopPeriodic() {
 
@@ -135,13 +138,13 @@ public class Robot extends TimedRobot {
     // If it was, set the solenoids to the Reverse position
     // If it was not, set the solenoids to the Forward position
     if (m_xbox.getAButtonPressed()) {
-      solenoid1.set(Value.kReverse);
-      solenoid2.set(Value.kReverse);
-    } else {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
+    } else {
+      solenoid1.set(Value.kReverse);
+      solenoid2.set(Value.kReverse);
     }
-    
+
     // Asks if the X Button is currently being pressed
     // If it is, set the intake motor controller to 60% power
     // If the ultrasonic detects less that 4 inches AND the timer has elapsed 2
@@ -220,7 +223,6 @@ public class Robot extends TimedRobot {
   // Good for initializing certain manipulators such as pneumatics
   @Override
   public void autonomousInit() {
-
 
   }
 

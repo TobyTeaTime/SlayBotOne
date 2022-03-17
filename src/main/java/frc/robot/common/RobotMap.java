@@ -75,4 +75,6 @@ public class RobotMap {
 	// (optional) 1/12 = 1 foot in 12 inches to convert to feet
 	public static double kInnerClimbTick2Inches = 1 / 1024 * 1 / 21 * 1.79 * Math.PI;
 	public static double kOuterClimbTick2Deg = 1 / 1024 * 1 / 100;
+
+	public static double distance = ultrasonic.getRangeInches();
 }
