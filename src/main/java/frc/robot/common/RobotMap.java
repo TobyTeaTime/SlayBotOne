@@ -62,9 +62,9 @@ public class RobotMap {
 
 	// Getting encoder data from TalonSRX Sensor ports
 	public static SensorCollection encoder1 = innerClimbLeft.getSensorCollection();
-	public static SensorCollection encoder2 = innerClimbRight.getSensorCollection();
-	public static SensorCollection encoder3 = outerClimbLeft.getSensorCollection();
-	public static SensorCollection encoder4 = outerClimbRight.getSensorCollection();
+	//public static SensorCollection encoder2 = innerClimbRight.getSensorCollection();
+	//public static SensorCollection encoder3 = outerClimbLeft.getSensorCollection();
+	//public static SensorCollection encoder4 = outerClimbRight.getSensorCollection();
 
 	// Calculating Encoder Ticks to Usable Units
 	// (will be different for every mechanism, dependant on gear ratio and encoder)
