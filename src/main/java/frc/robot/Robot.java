@@ -13,21 +13,12 @@ click "Teleoperated"
 package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import static frc.robot.common.RobotMap.*;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class Robot extends TimedRobot {
     
-    private SendableChooser<Double> fineControlSpeed = new SendableChooser<>();
-    private SendableChooser<Double> deadBandOptions = new SendableChooser<>();
-    private SendableChooser<Double> Encoder1 = new SendableChooser<>();
-    private SendableChooser<Double> Encoder2 = new SendableChooser<>();
-    private SendableChooser<Double> Encoder3 = new SendableChooser<>();
-    private SendableChooser<Double> Encoder4 = new SendableChooser<>();
+    
     double val = 0.65;
    // private SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
     //private final RamseteController m_ramsete = new RamseteController();
@@ -37,12 +28,7 @@ public class Robot extends TimedRobot {
     
     @Override
     public void robotInit() {
-        //File file = new File(Robot.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        //Shuffleboard.getTab("DEBUG").add("cimMotor Firm",cimMotor.getFirmwareVersion());
-        //Shuffleboard.getTab("DEBUG").add("miniCimMotor1 Firm",miniCimMotor1.getFirmwareVersion());
-        //Shuffleboard.getTab("DEBUG").add("miniCimMotor2 Firm",miniCimMotor2.getFirmwareVersion());
-        //Shuffleboard.getTab("DEBUG").add("Right Front Drivetrain Firm",m_rightFront.getFirmwareVersion());
-        //Shuffleboard.getTab("DEBUG").add("Last code deploy",sdf.format(file.lastModified()));
+       
         
         //Format all motor controllers
         intakeWheel.configFactoryDefault();
@@ -60,20 +46,6 @@ public class Robot extends TimedRobot {
         storageLeft.setInverted(true);
         storageRight.setInverted(true);
 
-        //Fine Control Speed chooser
-        fineControlSpeed.addOption("35% Speed", 0.35);
-        fineControlSpeed.addOption("40% Speed", 0.40);
-        fineControlSpeed.setDefaultOption("45% Speed", 0.45);
-        fineControlSpeed.addOption("50% Speed", 0.50);
-        fineControlSpeed.addOption("55% Speed", 0.55);
-        fineControlSpeed.addOption("60% Speed", 0.60);
-        Shuffleboard.getTab("Vision").add("Fine Control Speed", fineControlSpeed);
-        
-        //Deadband chooser
-        deadBandOptions.setDefaultOption("5%", 0.05);
-        deadBandOptions.addOption("10%", 0.10);
-        deadBandOptions.addOption("15%", 0.15);
-        Shuffleboard.getTab("Vision").add("Dead Band", deadBandOptions);
 
         
         
