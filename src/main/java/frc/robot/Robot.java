@@ -27,7 +27,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 @SuppressWarnings("FieldCanBeLocal")
 public class Robot extends TimedRobot {
 
-  double fineControlSpeedDouble = .45;
+  double fineControlSpeedDouble = .6;
   private final Timer m_timer = new Timer();
 
   @Override
@@ -152,9 +152,11 @@ public class Robot extends TimedRobot {
     // Set storage motor controller at 65% power
     // Set intake motor controller at 40% power
     // If the X Button is not being held, set both motor controllers to 0% power
+    
+    /*
     if (m_xbox.getXButton()) {
       intakeWheel.set(.6);
-      while (distance <= 4 /* || m_timer.hasElapsed(2) */) {
+      while (distance <= 4) {
         intakeWheel.set(.4);
         storageGroup.set(.65);
       }
@@ -162,6 +164,7 @@ public class Robot extends TimedRobot {
       intakeWheel.set(0);
       storageGroup.set(0);
     }
+    */
 
     /*
      * flywheel speed adjust
