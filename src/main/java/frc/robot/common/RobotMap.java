@@ -1,5 +1,6 @@
 package frc.robot.common;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 /*------------------------Imports------------------------------------*/
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -58,16 +60,13 @@ public class RobotMap {
 	public static DifferentialDrive m_drive = new DifferentialDrive(leftGroup, rightGroup);
 
 	// Sensors use DIO ports as parameters
-	// Ultrasonic uses two ports, one for Vcc, Ping, Gnd
-	// One for Echo
+	// Ultrasonic uses two ports, one for Vcc, Ping, Gnd, one for Echo
+	
 	public static Ultrasonic ultrasonic = new Ultrasonic(0, 1);
 	//limelight for hoop tracking and shooting
 	public static NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 	// Getting encoder data from TalonSRX Sensor ports
-	public static SensorCollection encoder1 = innerClimbLeft.getSensorCollection();
-	//public static SensorCollection encoder2 = innerClimbRight.getSensorCollection();
-	//public static SensorCollection encoder3 = outerClimbLeft.getSensorCollection();
-	//public static SensorCollection encoder4 = outerClimbRight.getSensorCollection();
+	
 
 	// Calculating Encoder Ticks to Usable Units
 	// (will be different for every mechanism, dependant on gear ratio and encoder)

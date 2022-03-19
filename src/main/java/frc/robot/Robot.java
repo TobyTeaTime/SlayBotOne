@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 // Start of robot code, declare variables to be used in robot code here
 @SuppressWarnings("FieldCanBeLocal")
@@ -59,6 +60,15 @@ public class Robot extends TimedRobot {
     outerClimbLeft.configFactoryDefault();
     outerClimbRight.configFactoryDefault();
 
+    innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    innerClimbRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    outerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    outerClimbRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+
+   innerClimbLeft.setSelectedSensorPosition(0,0,10);
+   innerClimbRight.setSelectedSensorPosition(0,0,10);
+   outerClimbLeft.setSelectedSensorPosition(0,0,10);
+   outerClimbRight.setSelectedSensorPosition(0,0,10);
     // Invert certain motors depending on which direction they need to go
     // Clock wise is default
     intakeWheel.setInverted(true);
