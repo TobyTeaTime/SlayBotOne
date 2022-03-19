@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class RobotMap {
 
@@ -59,7 +61,8 @@ public class RobotMap {
 	// Ultrasonic uses two ports, one for Vcc, Ping, Gnd
 	// One for Echo
 	public static Ultrasonic ultrasonic = new Ultrasonic(0, 1);
-
+	//limelight for hoop tracking and shooting
+	public static NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
 	// Getting encoder data from TalonSRX Sensor ports
 	public static SensorCollection encoder1 = innerClimbLeft.getSensorCollection();
 	//public static SensorCollection encoder2 = innerClimbRight.getSensorCollection();

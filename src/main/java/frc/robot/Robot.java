@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
   double fineControlSpeedDouble = .6;
   private final Timer m_timer = new Timer();
 
+
   @Override
   public void disabledInit() {
   }
@@ -114,7 +115,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
 
-    // Enables the Compressor, Make sure to turn the compressor off later
 
     // Sets solenoids to Forward Position
     // Check with Pneumatic System to verify which position is forward
@@ -137,7 +137,7 @@ public class Robot extends TimedRobot {
     // code was ran
     // If it was, set the solenoids to the Reverse position
     // If it was not, set the solenoids to the Forward position
-    if (m_xbox.getAButtonPressed()) {
+    if (m_xbox.getAButton()) {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
     } else {
@@ -145,6 +145,21 @@ public class Robot extends TimedRobot {
       solenoid2.set(Value.kReverse);
     }
 
+    if (m_xbox.getXButton() == true) {
+      intakeWheel.set(.6);
+    } else {
+      intakeWheel.set(0);
+    }
+    
+    if (m_xbox.getLeftBumper() == true) {
+      storageGroup.set(.65);
+    } else {
+      storageGroup.set(0);
+    }
+
+    if (m_xbox.getRightBumper()){
+      getDistance();
+    }
     // Asks if the X Button is currently being pressed
     // If it is, set the intake motor controller to 60% power
     // If the ultrasonic detects less that 4 inches AND the timer has elapsed 2
@@ -234,4 +249,60 @@ public class Robot extends TimedRobot {
 
   }
 
+  public static double getDistance() { // returns distance from upper hub horizontally
+
+    double ang_lime = 0;
+    double H_tape = 0;
+    double H_lime = 0;
+
+		try{
+
+			double Theta_t = limelightTable.getEntry("ty").getDouble(0); // angle that limelight sees
+			
+			if (Theta_t == 0) {
+                return 0; // this returns if limelight cant detect the tape
+      }
+
+			Math.tan(Math.toRadians(Theta_t+ang_lime)); // math
+			
+			double dist = (H_tape - H_lime)/Math.tan(Math.toRadians(Theta_t+ang_lime)); // more math
+			
+			dist = dist *39.37; // conversion from meters to inches
+                                    //dist *= 1.11; // error correction
+                                    //dist -= 2; // error correction
+
+			System.out.println(dist + " - distance    -----    " + Theta_t + " - ang lime");
+
+			return dist;
+
+		} catch (Exception e) {
+			System.out.println("dist error"+ e);
+			return 0;
+		}
+
+  }
+  
+  public static void alignDist(double Target_distance) { // moves to align distance of robot
+
+		double dist = getDistance();
+		double error = Target_distance - dist;
+
+		if (error > 15) {
+			m_drive.curvatureDrive(0, -0.15 , true);
+		} else if (error < -10) {
+			m_drive.curvatureDrive(0.0, 0.15 , true);
+		} else if (error > 10.0) {
+			m_drive.curvatureDrive(0, -0.15 , true);
+		} else {
+            //m_timer.reset();
+			    //shootBall = true;
+            //aligndist = false; // exceutes after has aligned distance correctly
+		}
+  }
+    public static void alignDist2(double Target_distance) { // moves to align distance of robot
+      double dist = getDistance();
+      double error = Target_distance - dist;
+      double speed = error * 0.1;
+      m_drive.curvatureDrive(0, speed, true);
+    }
 }
