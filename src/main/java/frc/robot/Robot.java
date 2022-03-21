@@ -52,8 +52,8 @@ public class Robot extends TimedRobot {
   // Good for things like resets, calibration, turning things on etc
   @Override
   public void robotInit() {
-    UsbCamera camer1a = CameraServer.startAutomaticCapture(0);
-    UsbCamera camera2 = CameraServer.startAutomaticCapture(0);
+    UsbCamera camera1 = CameraServer.startAutomaticCapture(0);
+    UsbCamera camera2 = CameraServer.startAutomaticCapture(1);
     // Format all motor controllers
     intakeWheel.configFactoryDefault();
     storageLeft.configFactoryDefault();
