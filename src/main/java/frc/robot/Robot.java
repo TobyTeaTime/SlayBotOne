@@ -263,7 +263,7 @@ public class Robot extends TimedRobot {
     // Sets the Climber motor controllers to different values depending on position
     // Motor controllers using position mode, recquires encoder data, as well as
     // Usable Unit equation
-    innerClimbLeft.set(ControlMode.PercentOutput, 0);
+    innerClimbLeft.set(ControlMode.PercentOutput, 0); 
     innerClimbLeft.set(ControlMode.PercentOutput, 0);
     outerClimbLeft.set(ControlMode.PercentOutput, 0);
     outerClimbLeft.set(ControlMode.PercentOutput, 0);
