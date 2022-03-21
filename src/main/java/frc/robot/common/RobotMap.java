@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableEntry;
+
 
 public class RobotMap {
 
@@ -33,9 +35,9 @@ public class RobotMap {
 	public static WPI_VictorSPX storageRight = new WPI_VictorSPX(6);
 	public static WPI_TalonFX flywheel = new WPI_TalonFX(7);
 
-	public static WPI_TalonSRX innerClimbLeft = new WPI_TalonSRX(8);
+	public static WPI_TalonSRX innerClimbLeft = new WPI_TalonSRX(10);
 	public static WPI_TalonSRX innerClimbRight = new WPI_TalonSRX(9);
-	public static WPI_TalonSRX outerClimbLeft = new WPI_TalonSRX(10);
+	public static WPI_TalonSRX outerClimbLeft = new WPI_TalonSRX(8);
 	public static WPI_TalonSRX outerClimbRight = new WPI_TalonSRX(11);
 
 	// Solenoids use pcm ports as parameters
@@ -64,7 +66,12 @@ public class RobotMap {
 	
 	public static Ultrasonic ultrasonic = new Ultrasonic(0, 1);
 	//limelight for hoop tracking and shooting
+
+	
 	public static NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+
+	
+	
 	// Getting encoder data from TalonSRX Sensor ports
 	
 
@@ -78,5 +85,5 @@ public class RobotMap {
 	public static double kInnerClimbTick2Inches = 1 / 1024 * 1 / 21 * 1.79 * Math.PI;
 	public static double kOuterClimbTick2Deg = 1 / 1024 * 1 / 100;
 
-	public static double distance = ultrasonic.getRangeInches();
+	
 }

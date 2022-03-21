@@ -20,17 +20,25 @@ import static frc.robot.common.RobotMap.*;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 // Start of robot code, declare variables to be used in robot code here
 @SuppressWarnings("FieldCanBeLocal")
 public class Robot extends TimedRobot {
-
+  private static boolean press = false;
+  public static boolean overide = false;
   double fineControlSpeedDouble = .6;
   private final Timer m_timer = new Timer();
-
+  private static double dist = 0;
+  
 
   @Override
   public void disabledInit() {
@@ -44,6 +52,8 @@ public class Robot extends TimedRobot {
   // Good for things like resets, calibration, turning things on etc
   @Override
   public void robotInit() {
+    UsbCamera camer1a = CameraServer.startAutomaticCapture(0);
+    UsbCamera camera2 = CameraServer.startAutomaticCapture(0);
     // Format all motor controllers
     intakeWheel.configFactoryDefault();
     storageLeft.configFactoryDefault();
@@ -61,14 +71,13 @@ public class Robot extends TimedRobot {
     outerClimbRight.configFactoryDefault();
 
     innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-    innerClimbRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-    outerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
-    outerClimbRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 
+/*
    innerClimbLeft.setSelectedSensorPosition(0,0,10);
    innerClimbRight.setSelectedSensorPosition(0,0,10);
    outerClimbLeft.setSelectedSensorPosition(0,0,10);
    outerClimbRight.setSelectedSensorPosition(0,0,10);
+   */
     // Invert certain motors depending on which direction they need to go
     // Clock wise is default
     intakeWheel.setInverted(true);
@@ -76,40 +85,36 @@ public class Robot extends TimedRobot {
     rightFront.setInverted(true);
     storageLeft.setInverted(true);
     storageRight.setInverted(true);
+    outerClimbRight.setInverted(true);
+    outerClimbLeft.setInverted(false);
+    
 
     // Makes Master Follower pair, RIO sends same signal to two motors
     innerClimbRight.follow(innerClimbLeft);
-    outerClimbRight.follow(outerClimbRight);
+    outerClimbRight.follow(outerClimbLeft);
 
     // Sets deadband for the drive train
     // Any imput detected from the controller under 5% will not be used
     m_drive.setDeadband(.05);
 
+    
   }
 
   // robotPeriodic = code that will be run as long as the robot is on
   // Good for monitoring encoders, sensors, etc (Bot does not need to be enabled)
   @Override
   public void robotPeriodic() {
-
     // Puts numbers from Encoders on the SmartDashboard network table
     // Open Shuffleboard to see numbers, can be visualized as graphs or other
     // graphic
+    int absolutePosition = innerClimbLeft.getSensorCollection().getPulseWidthPosition();
+  //
+    ultrasonic.setEnabled(true);
 
-    SmartDashboard.putNumber("InnerClimbLeft Encoder Value",
-        innerClimbLeft.getSelectedSensorPosition() * kInnerClimbTick2Inches);
-    /*
-     * SmartDashboard.putNumber("InnerClimbRight Encoder Value",
-     * innerClimbRight.getSelectedSensorPosition() * kInnerClimbTick2Inches);
-     * SmartDashboard.putNumber("OuterClimbLeft Encoder Value",
-     * outerClimbLeft.getSelectedSensorPosition() * kOuterClimbTick2Deg);
-     * SmartDashboard.putNumber("OuterClimbRight Encoder Value",
-     * outerClimbRight.getSelectedSensorPosition() * kOuterClimbTick2Deg);
-     */
+    double distance = ultrasonic.getRangeInches();
+
     SmartDashboard.putNumber("Ultrasonic",
         distance);
-
-    compressor.enableDigital();
 
     // Uses the Pressure Switxh to turn off the compressor
     // PSI depends on Pressure Switch, 2022 bot uses a Pressure Switch that switches
@@ -118,7 +123,16 @@ public class Robot extends TimedRobot {
       compressor.disable();
     }
 
+    SmartDashboard.putNumber("limelight target", limelightTable.getEntry("tv").getDouble(0));
+    SmartDashboard.putNumber("limelight angle", limelightTable.getEntry("ty").getDouble(0));
+    SmartDashboard.putNumber("limelight distance", getDistance());
+    SmartDashboard.putNumber("Target distance", 160);
+    innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    SmartDashboard.putNumber("InnerClimbLeft Encoder", innerClimbLeft.getSelectedSensorPosition());
+    // System.out.println(SmartDashboard.getNumber("Target distance",160));
+
   }
+  
 
   // teleopInit = code that is run on teleop (teleoperation) startup
   // Good for initializing certain manips or pneumatic systems
@@ -140,6 +154,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
+    double position = innerClimbLeft.getSelectedSensorPosition();
+
+    compressor.enableDigital();
+    //System.out.println("compressor on");
     // starts a timer object created previously
     m_timer.start();
 
@@ -150,7 +168,8 @@ public class Robot extends TimedRobot {
     if (m_xbox.getAButton()) {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
-    } else {
+    } 
+    else if (m_xbox.getStartButton()) {
       solenoid1.set(Value.kReverse);
       solenoid2.set(Value.kReverse);
     }
@@ -161,15 +180,34 @@ public class Robot extends TimedRobot {
       intakeWheel.set(0);
     }
     
-    if (m_xbox.getLeftBumper() == true) {
-      storageGroup.set(.65);
+    
+    if (m_xbox.getBButton() == true) {
+      storageGroup.set(.60);
     } else {
       storageGroup.set(0);
     }
 
-    if (m_xbox.getRightBumper()){
-      getDistance();
+    overide = false;
+    if (m_xbox.getRightBumper() == true){
+        alignDist2(82);
+
+     
+     overide = true;
     }
+
+    if (m_xbox.getLeftBumper() == true)
+    {
+        alignX2();
+      overide = true;
+    }
+    if (m_xbox.getLeftTriggerAxis() != 0){
+      m_drive.curvatureDrive(m_xbox.getLeftY()*0.4*m_xbox.getLeftTriggerAxis() ,m_xbox.getLeftX()*-0.3*m_xbox.getLeftTriggerAxis() , true);
+      overide = true;
+    }
+    
+     
+      //alignDist(100);
+  
     // Asks if the X Button is currently being pressed
     // If it is, set the intake motor controller to 60% power
     // If the ultrasonic detects less that 4 inches AND the timer has elapsed 2
@@ -191,15 +229,18 @@ public class Robot extends TimedRobot {
     }
     */
 
-    /*
-     * flywheel speed adjust
-     * if (m_xbox.getBButtonPressed()){
-     * val += .05;
-     * System.out.println(val);
-     * } else if (m_xbox.getYButtonPressed()) {
-     * val -= .05;
-     * System.out.println(val);
-     * }
+    
+     // flywheel speed adjust
+     /*
+      if (m_xbox.getBButtonPressed()){
+      //val += .05;
+      //System.out.println(val);
+      innerClimbLeft.set(ControlMode.PercentOutput, 0.1);
+      } else if (m_xbox.getYButtonPressed()) {
+      //val -= .05;
+      //System.out.println(val);
+      innerClimbLeft.set(ControlMode.PercentOutput, -0.1);
+      }
      */
 
     // Asks what the current state of the Right Trigger is on the Logitech
@@ -207,25 +248,33 @@ public class Robot extends TimedRobot {
     // This axis in range from 0 to 1
     // If the state is greater that 0, set Flywheel motor controller at 70% power
     // If the state is 0 or lower, set Flywheel motor controller at 0% power
-    if (m_xbox.getRightTriggerAxis() > 0) {
-      flywheel.set(.7);
-    } else {
-      flywheel.set(0);
+  
+    flywheel.set(m_xbox.getRightTriggerAxis()*0.65); 
+    if (m_joy.getRawButton(8)){
+      flywheel.set(ControlMode.PercentOutput,-0.2);
     }
+    if (m_joy.getRawButtonReleased(8)){
+      flywheel.set(ControlMode.PercentOutput,0);
+    }
+
+  
 
     // Asks which position the Directional Pad of the Logitech controller is in
     // Sets the Climber motor controllers to different values depending on position
     // Motor controllers using position mode, recquires encoder data, as well as
     // Usable Unit equation
+    innerClimbLeft.set(ControlMode.PercentOutput, 0);
+    innerClimbLeft.set(ControlMode.PercentOutput, 0);
+    outerClimbLeft.set(ControlMode.PercentOutput, 0);
+    outerClimbLeft.set(ControlMode.PercentOutput, 0);
+    
     if (m_xbox.getPOV() == 0) {
-      innerClimbLeft.set(ControlMode.Position, 6 / kInnerClimbTick2Inches);
+      innerClimbLeft.set(ControlMode.PercentOutput, -.55);
     } else if (m_xbox.getPOV() == 180) {
-      innerClimbLeft.set(ControlMode.Position, -6 / kInnerClimbTick2Inches);
-    } else if (m_xbox.getPOV() == 90) {
-      outerClimbLeft.set(ControlMode.Position, 45 / kOuterClimbTick2Deg);
-    } else if (m_xbox.getPOV() == 270) {
-      outerClimbLeft.set(ControlMode.Position, -45 / kOuterClimbTick2Deg);
+      innerClimbLeft.set(ControlMode.PercentOutput, .55);
     }
+     outerClimbLeft.set(ControlMode.PercentOutput, m_xbox.getRightY() *0.4);
+
 
     // Asks which position the Directional Input of the Logitech joystick is in
     // Sets DriveTrain to specified speed declared previously
@@ -244,27 +293,63 @@ public class Robot extends TimedRobot {
     // Asks what the currnet position of the Y and X axes are
     // Uses axes position from -1 to 1 as motor controller percentage power
     // Might need to modify negatices depending on robot or drivetrain type
-    m_drive.arcadeDrive(m_joy.getY(), -m_joy.getX());
+    if (!overide){
+      m_drive.curvatureDrive(m_joy.getY(), -m_joy.getX()*0.6,true);
+    }
+
+    if (m_joy.getRawButton(12)) {
+      limelightTable.getEntry("ledMode").setNumber(1);
+    } else if (m_joy.getRawButton(11)) {
+      limelightTable.getEntry("ledMode").setNumber(3);
+    }
   }
 
   // autonomousInit = code that is run upon the start of autonomous
   // Good for initializing certain manipulators such as pneumatics
   @Override
   public void autonomousInit() {
-
+    m_timer.start();
+    m_timer.reset();
   }
 
   @Override
   public void autonomousPeriodic() {
-
+    m_drive.curvatureDrive(0, 0, false);
+    double T1 = 1.5;
+    double T2 = T1+0.5;
+    double T3 = T2 + 3.5;
+    double T4 = T3 + 3;
+    double T5 = T3 + 2;
+    if (m_timer.get() < T1){
+      m_drive.curvatureDrive(0.4, 0, false);
+    }
+    else if (m_timer.get() < T2){
+      alignX2();
+    }
+    else if (m_timer.get() < T3){
+      alignDist(82);
+    }
+    else if (m_timer.get() < T4){
+     flywheel.set(ControlMode.PercentOutput, 0.7);
+      if (m_timer.get() > T5){
+        storageGroup.set(0.6);
+      }
+    }
+    else{
+      flywheel.set(ControlMode.PercentOutput,0);
+      storageGroup.set(0);
+    }
   }
 
   public static double getDistance() { // returns distance from upper hub horizontally
 
-    double ang_lime = 0;
-    double H_tape = 0;
-    double H_lime = 0;
-
+    double ang_lime = 29;
+    double H_tape = 2.4384;
+    double H_lime = 0.66;
+    //System.out.println("distancing");
+    //System.out.println( limelightTable.getEntry("ty").getDouble(0.0));
+   String k =  limelightTable.getPath();
+   //System.out.println(k);
 		try{
 
 			double Theta_t = limelightTable.getEntry("ty").getDouble(0); // angle that limelight sees
@@ -281,7 +366,7 @@ public class Robot extends TimedRobot {
                                     //dist *= 1.11; // error correction
                                     //dist -= 2; // error correction
 
-			System.out.println(dist + " - distance    -----    " + Theta_t + " - ang lime");
+		//	System.out.println(dist + " - distance    -----    " + Theta_t + " - ang lime");
 
 			return dist;
 
@@ -293,26 +378,57 @@ public class Robot extends TimedRobot {
   }
   
   public static void alignDist(double Target_distance) { // moves to align distance of robot
-
-		double dist = getDistance();
+		if (getDistance() != 0){
+      dist = getDistance();
+    }
 		double error = Target_distance - dist;
-
-		if (error > 15) {
-			m_drive.curvatureDrive(0, -0.15 , true);
-		} else if (error < -10) {
-			m_drive.curvatureDrive(0.0, 0.15 , true);
+    System.out.println(error);
+   
+		if (error > 5) {
+			m_drive.arcadeDrive(0.5, 0);
+		}
+    else if (error < -5){
+      m_drive.arcadeDrive(-0.5, 0);
+    }
+     else if (error < -10) {
+			m_drive.arcadeDrive(-0.6, 0 );
 		} else if (error > 10.0) {
-			m_drive.curvatureDrive(0, -0.15 , true);
+			m_drive.arcadeDrive(0.6, 0);
 		} else {
+      System.out.println("if not working");
             //m_timer.reset();
 			    //shootBall = true;
             //aligndist = false; // exceutes after has aligned distance correctly
 		}
   }
-    public static void alignDist2(double Target_distance) { // moves to align distance of robot
+  public static void alignX() {
+    double error = limelightTable.getEntry("tx").getDouble(0);
+    System.out.println(error);
+    if (error > 3){
+      m_drive.arcadeDrive(0, -0.4);
+    }
+    else if (error > 10){
+      m_drive.arcadeDrive(0, -0.6);
+    }
+    else if (error < -3){
+      m_drive.arcadeDrive(0, 0.4);
+    }
+    else if (error < -10){
+      m_drive.arcadeDrive(0, 0.6);
+    }
+  }
+
+  public static void alignX2(){
+    double error = limelightTable.getEntry("tx").getDouble(0);
+    double k = -0.05;
+    double speed = error*k;
+    m_drive.arcadeDrive(0, speed);
+  }
+  public static void alignDist2(double Target_distance) { // moves to align distance of robot
       double dist = getDistance();
       double error = Target_distance - dist;
-      double speed = error * 0.1;
-      m_drive.curvatureDrive(0, speed, true);
+      double speed = error * 0.015;
+      m_drive.arcadeDrive(speed, 0);
     }
+
 }
