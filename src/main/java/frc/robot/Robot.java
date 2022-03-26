@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -42,6 +41,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+
   }
 
   @Override
@@ -70,7 +70,7 @@ public class Robot extends TimedRobot {
     outerClimbLeft.configFactoryDefault();
     outerClimbRight.configFactoryDefault();
 
-    innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
+    //innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder);
 
 /*
    innerClimbLeft.setSelectedSensorPosition(0,0,10);
@@ -107,8 +107,9 @@ public class Robot extends TimedRobot {
     // Puts numbers from Encoders on the SmartDashboard network table
     // Open Shuffleboard to see numbers, can be visualized as graphs or other
     // graphic
-    int absolutePosition = innerClimbLeft.getSensorCollection().getPulseWidthPosition();
+   // int absolutePosition = innerClimbLeft.getSensorCollection().getPulseWidthPosition();
   //
+
     ultrasonic.setEnabled(true);
 
     double distance = ultrasonic.getRangeInches();
@@ -127,8 +128,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("limelight angle", limelightTable.getEntry("ty").getDouble(0));
     SmartDashboard.putNumber("limelight distance", getDistance());
     SmartDashboard.putNumber("Target distance", 160);
-    innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-    SmartDashboard.putNumber("InnerClimbLeft Encoder", innerClimbLeft.getSelectedSensorPosition());
+   // innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+    //SmartDashboard.putNumber("InnerClimbLeft Encoder", innerClimbLeft.getSelectedSensorPosition());
     // System.out.println(SmartDashboard.getNumber("Target distance",160));
 
   }
@@ -138,12 +139,12 @@ public class Robot extends TimedRobot {
   // Good for initializing certain manips or pneumatic systems
   @Override
   public void teleopInit() {
-
+    solenoid1.set(Value.kForward);
+    solenoid2.set(Value.kForward);
 
     // Sets solenoids to Forward Position
     // Check with Pneumatic System to verify which position is forward
-    solenoid1.set(Value.kReverse);
-    solenoid2.set(Value.kReverse);
+    
 
   }
 
@@ -154,9 +155,11 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    double position = innerClimbLeft.getSelectedSensorPosition();
+   // double position = innerClimbLeft.getSelectedSensorPosition();
+   SmartDashboard.putNumber("RPM", flywheel.getSelectedSensorVelocity());
 
     compressor.enableDigital();
+    
     //System.out.println("compressor on");
     // starts a timer object created previously
     m_timer.start();
@@ -165,7 +168,7 @@ public class Robot extends TimedRobot {
     // code was ran
     // If it was, set the solenoids to the Reverse position
     // If it was not, set the solenoids to the Forward position
-    if (m_xbox.getAButton()) {
+    if (m_xbox.getXButton()) {
       solenoid1.set(Value.kForward);
       solenoid2.set(Value.kForward);
     } 
@@ -174,7 +177,7 @@ public class Robot extends TimedRobot {
       solenoid2.set(Value.kReverse);
     }
 
-    if (m_xbox.getXButton() == true) {
+    if (m_xbox.getAButton() == true) {
       intakeWheel.set(.6);
     } else {
       intakeWheel.set(0);
@@ -189,7 +192,7 @@ public class Robot extends TimedRobot {
 
     overide = false;
     if (m_xbox.getRightBumper() == true){
-        alignDist2(82);
+        alignDist(90);
 
      
      overide = true;
@@ -201,7 +204,7 @@ public class Robot extends TimedRobot {
       overide = true;
     }
     if (m_xbox.getLeftTriggerAxis() != 0){
-      m_drive.curvatureDrive(m_xbox.getLeftY()*0.4*m_xbox.getLeftTriggerAxis() ,m_xbox.getLeftX()*-0.3*m_xbox.getLeftTriggerAxis() , true);
+      m_drive.curvatureDrive(m_xbox.getLeftY()*0.6*m_xbox.getLeftTriggerAxis() ,m_xbox.getLeftX()*-0.3*m_xbox.getLeftTriggerAxis() , true);
       overide = true;
     }
     
@@ -248,8 +251,15 @@ public class Robot extends TimedRobot {
     // This axis in range from 0 to 1
     // If the state is greater that 0, set Flywheel motor controller at 70% power
     // If the state is 0 or lower, set Flywheel motor controller at 0% power
-  
-    flywheel.set(m_xbox.getRightTriggerAxis()*0.65); 
+    flywheel.set(ControlMode.PercentOutput,0);
+    if (m_xbox.getRightTriggerAxis() > 0.5){
+      if (flywheel.getSelectedSensorVelocity() > 13300){
+        storageGroup.set(0.6);
+      }
+      flywheel.set(ControlMode.PercentOutput, 0.7 * m_xbox.getRightTriggerAxis());
+      
+    }
+    //flywheel.set(m_xbox.getRightTriggerAxis()*0.65); 
     if (m_joy.getRawButton(8)){
       flywheel.set(ControlMode.PercentOutput,-0.2);
     }
@@ -271,10 +281,9 @@ public class Robot extends TimedRobot {
     if (m_xbox.getPOV() == 0) {
       innerClimbLeft.set(ControlMode.PercentOutput, -.55);
     } else if (m_xbox.getPOV() == 180) {
-      innerClimbLeft.set(ControlMode.PercentOutput, .55);
+      innerClimbLeft.set(ControlMode.PercentOutput, .7);
     }
-     outerClimbLeft.set(ControlMode.PercentOutput, m_xbox.getRightY() *0.4);
-
+     outerClimbLeft.set(ControlMode.PercentOutput, m_xbox.getRightY() *0.35);
 
     // Asks which position the Directional Input of the Logitech joystick is in
     // Sets DriveTrain to specified speed declared previously
@@ -308,29 +317,31 @@ public class Robot extends TimedRobot {
   // Good for initializing certain manipulators such as pneumatics
   @Override
   public void autonomousInit() {
+    solenoid1.set(Value.kReverse);
+    solenoid2.set(Value.kReverse);
     m_timer.start();
     m_timer.reset();
   }
 
-  @Override
-  public void autonomousPeriodic() {
+  //@Override
+  public void autonomousPeriodic2() {
     m_drive.curvatureDrive(0, 0, false);
-    double T1 = 1.5;
-    double T2 = T1+0.5;
-    double T3 = T2 + 3.5;
+    double T1 = 2;
+    double T2 = T1+0.0;
+    double T3 = T2 + 3;
     double T4 = T3 + 3;
     double T5 = T3 + 2;
     if (m_timer.get() < T1){
-      m_drive.curvatureDrive(0.4, 0, false);
+      m_drive.curvatureDrive(0.3, 0, false);
     }
-    else if (m_timer.get() < T2){
-      alignX2();
-    }
+    //else if (m_timer.get() < T2){
+    //  alignX2();
+    //}
     else if (m_timer.get() < T3){
-      alignDist(82);
+      alignDist(85);
     }
     else if (m_timer.get() < T4){
-     flywheel.set(ControlMode.PercentOutput, 0.7);
+     flywheel.set(ControlMode.PercentOutput, 0.70);
       if (m_timer.get() > T5){
         storageGroup.set(0.6);
       }
@@ -341,14 +352,67 @@ public class Robot extends TimedRobot {
     }
   }
 
+  @Override
+  public void autonomousPeriodic() {
+    m_drive.curvatureDrive(0, 0, false);
+    double T1 = 1;//1
+    double T2 = T1+2;//2
+    double T3 = T1 + 1.5;//1.5
+    double T4 = T2 + 0.3; // 1 - this is moving back after fire
+    double T5 = T4 +1; //1 turning left
+    double T6 = T5 + 1;// 1
+    double T7 = T6 + 1;//1
+
+    double T8 = T7 + 0.7;// 0.7moving forward to range
+    double T9 = T8 + 2;
+    double T10 = T8 +1.5;
+    if (m_timer.get() < T1){
+    m_drive.curvatureDrive(0.25, 0, false);   
+     //alignDist(105);
+    }
+    else if (m_timer.get() < T2){
+      flywheel.set(ControlMode.PercentOutput, 0.65);
+      if (m_timer.get() > T3){
+        storageGroup.set(0.6);
+      }
+    }
+    else if (m_timer.get() < T4){ //move back
+      m_drive.curvatureDrive(0.25, 0,false);
+
+    }
+    else if (m_timer.get() < T5){ //turn left
+      //System.out.println("moving lef");
+      m_drive.curvatureDrive(0, 0.31, true);
+     
+    }
+    else if (m_timer.get() < T6){ //intake ball 2
+      intakeWheel.set(ControlMode.PercentOutput,0.65);
+      m_drive.curvatureDrive(-0.33,0,false);
+    }
+    else if (m_timer.get() < T7){ // turn right
+      m_drive.curvatureDrive(0,-0.33,true);
+    }
+    else if (m_timer.get() < T8){ // move forward
+      m_drive.curvatureDrive(-0.3,0, false);
+    }
+    else if (m_timer.get() < T9){
+      flywheel.set(ControlMode.PercentOutput, 0.65);
+      if (m_timer.get() > T10){
+        System.out.println("storage moving");
+        storageGroup.set(0.6);
+       // intakeWheel.set(ControlMode.PercentOutput, 0.6);
+      }    
+    }   
+  }
+
   public static double getDistance() { // returns distance from upper hub horizontally
 
     double ang_lime = 29;
-    double H_tape = 2.4384;
+    double H_tape = 2.642;
     double H_lime = 0.66;
     //System.out.println("distancing");
     //System.out.println( limelightTable.getEntry("ty").getDouble(0.0));
-   String k =  limelightTable.getPath();
+   //String k =  limelightTable.getPath();
    //System.out.println(k);
 		try{
 
@@ -394,12 +458,7 @@ public class Robot extends TimedRobot {
 			m_drive.arcadeDrive(-0.6, 0 );
 		} else if (error > 10.0) {
 			m_drive.arcadeDrive(0.6, 0);
-		} else {
-      System.out.println("if not working");
-            //m_timer.reset();
-			    //shootBall = true;
-            //aligndist = false; // exceutes after has aligned distance correctly
-		}
+		} 
   }
   public static void alignX() {
     double error = limelightTable.getEntry("tx").getDouble(0);
@@ -427,7 +486,7 @@ public class Robot extends TimedRobot {
   public static void alignDist2(double Target_distance) { // moves to align distance of robot
       double dist = getDistance();
       double error = Target_distance - dist;
-      double speed = error * 0.015;
+      double speed = error * 0.01;
       m_drive.arcadeDrive(speed, 0);
     }
 
