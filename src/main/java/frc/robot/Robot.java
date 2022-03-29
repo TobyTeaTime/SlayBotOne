@@ -128,6 +128,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("limelight angle", limelightTable.getEntry("ty").getDouble(0));
     SmartDashboard.putNumber("limelight distance", getDistance());
     SmartDashboard.putNumber("Target distance", 160);
+    SmartDashboard.putBoolean("Flywheel Ready", flywheel.getSelectedSensorVelocity() > 13300);
    // innerClimbLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     //SmartDashboard.putNumber("InnerClimbLeft Encoder", innerClimbLeft.getSelectedSensorPosition());
     // System.out.println(SmartDashboard.getNumber("Target distance",160));
@@ -204,7 +205,7 @@ public class Robot extends TimedRobot {
       overide = true;
     }
     if (m_xbox.getLeftTriggerAxis() != 0){
-      m_drive.curvatureDrive(m_xbox.getLeftY()*0.6*m_xbox.getLeftTriggerAxis() ,m_xbox.getLeftX()*-0.3*m_xbox.getLeftTriggerAxis() , true);
+      m_drive.curvatureDrive(m_xbox.getLeftY()*0.5*m_xbox.getLeftTriggerAxis() ,m_xbox.getLeftX()*-0.3*m_xbox.getLeftTriggerAxis() , true);
       overide = true;
     }
     
@@ -252,12 +253,8 @@ public class Robot extends TimedRobot {
     // If the state is greater that 0, set Flywheel motor controller at 70% power
     // If the state is 0 or lower, set Flywheel motor controller at 0% power
     flywheel.set(ControlMode.PercentOutput,0);
-    if (m_xbox.getRightTriggerAxis() > 0.5){
-      if (flywheel.getSelectedSensorVelocity() > 13300){
-        storageGroup.set(0.6);
-      }
+    if (m_xbox.getRightTriggerAxis() > 0.2){
       flywheel.set(ControlMode.PercentOutput, 0.7 * m_xbox.getRightTriggerAxis());
-      
     }
     //flywheel.set(m_xbox.getRightTriggerAxis()*0.65); 
     if (m_joy.getRawButton(8)){
@@ -265,6 +262,11 @@ public class Robot extends TimedRobot {
     }
     if (m_joy.getRawButtonReleased(8)){
       flywheel.set(ControlMode.PercentOutput,0);
+    }
+    if (m_xbox.getYButton()){
+      if (flywheel.getSelectedSensorVelocity() > 15000){
+        storageGroup.set(0.6);
+      }
     }
 
   
@@ -283,7 +285,7 @@ public class Robot extends TimedRobot {
     } else if (m_xbox.getPOV() == 180) {
       innerClimbLeft.set(ControlMode.PercentOutput, .7);
     }
-     outerClimbLeft.set(ControlMode.PercentOutput, m_xbox.getRightY() *0.35);
+     outerClimbLeft.set(ControlMode.PercentOutput, m_xbox.getRightY() *0.5);
 
     // Asks which position the Directional Input of the Logitech joystick is in
     // Sets DriveTrain to specified speed declared previously
@@ -356,18 +358,18 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     m_drive.curvatureDrive(0, 0, false);
     double T1 = 1;//1
-    double T2 = T1+2;//2
-    double T3 = T1 + 1.5;//1.5
-    double T4 = T2 + 0.3; // 1 - this is moving back after fire
-    double T5 = T4 +1; //1 turning left
+    double T2 = T1+3;//2
+    double T3 = T1 + 2;//2
+    double T4 = T2 + 0.7; // 0.7 - this is moving back after fire
+    double T5 = T4 +2; //2 turning left
     double T6 = T5 + 1;// 1
-    double T7 = T6 + 1;//1
+    double T7 = T6 + 2;//2
 
-    double T8 = T7 + 0.7;// 0.7moving forward to range
-    double T9 = T8 + 2;
-    double T10 = T8 +1.5;
+    double T8 = T7 + 0.9;// 0.9moving forward to range
+    double T9 = T8 + 2; //2
+    double T10 = T8 +2; //2
     if (m_timer.get() < T1){
-    m_drive.curvatureDrive(0.25, 0, false);   
+    m_drive.curvatureDrive(0.24, 0, false);   
      //alignDist(105);
     }
     else if (m_timer.get() < T2){
@@ -377,12 +379,14 @@ public class Robot extends TimedRobot {
       }
     }
     else if (m_timer.get() < T4){ //move back
-      m_drive.curvatureDrive(0.25, 0,false);
+      m_drive.curvatureDrive(0.32, 0,false);
 
     }
     else if (m_timer.get() < T5){ //turn left
       //System.out.println("moving lef");
-      m_drive.curvatureDrive(0, 0.31, true);
+      flywheel.set(ControlMode.PercentOutput, 0.0);
+      m_drive.curvatureDrive(0, 0.36, true);
+      storageGroup.set(0);
      
     }
     else if (m_timer.get() < T6){ //intake ball 2
@@ -390,13 +394,15 @@ public class Robot extends TimedRobot {
       m_drive.curvatureDrive(-0.33,0,false);
     }
     else if (m_timer.get() < T7){ // turn right
-      m_drive.curvatureDrive(0,-0.33,true);
+      m_drive.curvatureDrive(0,-0.34,true);
     }
     else if (m_timer.get() < T8){ // move forward
       m_drive.curvatureDrive(-0.3,0, false);
+      storageGroup.set(0.35);
     }
     else if (m_timer.get() < T9){
       flywheel.set(ControlMode.PercentOutput, 0.65);
+      storageGroup.set(0);
       if (m_timer.get() > T10){
         System.out.println("storage moving");
         storageGroup.set(0.6);

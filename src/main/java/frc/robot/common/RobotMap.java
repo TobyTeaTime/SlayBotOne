@@ -37,7 +37,7 @@ public class RobotMap {
 
 	public static WPI_TalonSRX innerClimbLeft = new WPI_TalonSRX(10);
 	public static WPI_TalonSRX innerClimbRight = new WPI_TalonSRX(9);
-	public static WPI_TalonSRX outerClimbLeft = new WPI_TalonSRX(8);
+	public static WPI_VictorSPX outerClimbLeft = new WPI_VictorSPX(8);  //TODO changed from talon to victor (might break things)
 	public static WPI_TalonSRX outerClimbRight = new WPI_TalonSRX(11);
 
 	// Solenoids use pcm ports as parameters
